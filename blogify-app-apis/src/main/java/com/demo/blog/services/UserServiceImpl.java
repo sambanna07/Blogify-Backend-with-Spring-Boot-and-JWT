@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.User;
+import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
 import com.demo.blog.payload.UserDTO;
 import com.demo.blog.reposistories.UserRepo;
+
+import lombok.extern.java.Log;
 
 /**
  * 
@@ -18,6 +21,7 @@ import com.demo.blog.reposistories.UserRepo;
  */
 
 @Service
+@Log
 public class UserServiceImpl implements UserService {
 	
 	@Autowired
@@ -25,9 +29,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO createUser(UserDTO userDTO) {
+		boolean exists=this.userRepo.existsByEmail(userDTO.getEmail());
+		if(exists) {
+			throw new AlreadyExistException("user","email",userDTO.getEmail());
+		}
+		log.info("email"+exists);
 		User user=this.userDTOToUser(userDTO); //convert to user object
-		User savedUser=userRepo.save(user);  //save to databse
+		User savedUser=userRepo.save(user);  //save to database
 		return this.userToUserDTO(savedUser);
+		
 	}
 
 	@Override
@@ -63,6 +73,7 @@ public class UserServiceImpl implements UserService {
 	public void deleteUser(Integer userId) {
 		User user=this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User "," id ", userId));
 		this.userRepo.delete(user);
+//		boolean alreadyexist=this.userRepo.existsById(userId);
 		
 	}
 
