@@ -14,7 +14,9 @@ import com.demo.blog.entity.User;
  *this give all the methods like save,findbyid.findall
  */
 
-@Repository
+
 public interface UserRepo extends JpaRepository<User, Integer> {
+	
+	public boolean existsByEmail(String email);
 
 }
