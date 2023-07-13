@@ -1,33 +1,45 @@
 package com.demo.blog.advice;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
+import com.demo.blog.exceptions.ServiceInternalException;
 
 import lombok.extern.java.Log;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Log
 public class UserControllerAdvice extends ResponseEntityExceptionHandler{
 	
+	private static final String RESOURCE_NOT_FOUND = null;
+
+
 	/**
 	 * handle the ResourceNotFoundException and return user friendly message
 	 * @param resourceNotFoundException
 	 * @return
 	 */
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException resourceNotFoundException){
-		log.info(resourceNotFoundException.getMessage());
-		return new ResponseEntity<>(resourceNotFoundException.getMessage(),HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> handleResourceNotFoundException
+	(ResourceNotFoundException resourceNotFoundException){
+		return ResponseEntity
+				.status(resourceNotFoundException.getErrorCode())
+				.body(resourceNotFoundException.getMessage());
 		
 	}
     
@@ -38,7 +50,7 @@ public class UserControllerAdvice extends ResponseEntityExceptionHandler{
 	 */
 	@ExceptionHandler(AlreadyExistException.class)
 	public ResponseEntity<?> handleAlreadyExistException(AlreadyExistException alreadyExistException){
-		return new ResponseEntity<>(alreadyExistException.getMessage(),HttpStatus.NOT_FOUND);
+		return ResponseEntity.status(alreadyExistException.getErrorCode()).body(alreadyExistException.getMessage());
 	}
 	
 	
@@ -59,13 +71,34 @@ public class UserControllerAdvice extends ResponseEntityExceptionHandler{
 				HttpStatus.BAD_REQUEST);
 	}
 	
-	
+	/**
+	 * handle if user give not valid data
+	 */
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-        return ResponseEntity.badRequest().body(errorMessage);
+//		String errorMessage = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+//        return ResponseEntity.badRequest().body(errorMessage);
+		Map<String,String> resp=new HashMap();
+		ex.getBindingResult().getAllErrors()
+		        .forEach((error) ->
+		        {
+		        	String fieldName=((FieldError)error).getField();
+		        	String message=error.getDefaultMessage();
+		        	resp.put(fieldName, message);
+		        });
+		return ResponseEntity.status(699).body(resp);
+
 	}
+	
+	
+	@ExceptionHandler(ServiceInternalException.class)
+	public ResponseEntity<?> handleException(ServiceInternalException serviceInternalException) {
+		return ResponseEntity.status(serviceInternalException.getErrorCode()).
+				body(serviceInternalException.getMessage());
+		
+	}
+	
 
 	
 	

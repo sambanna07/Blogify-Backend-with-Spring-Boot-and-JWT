@@ -1,6 +1,6 @@
 package com.demo.blog.payload;
 
-import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
@@ -27,6 +27,7 @@ public class UserDTO {
 	private String email;
 	
 	@NotBlank(message="password field required")
+	@Min(value = 8,message = "minimum length of password must be 8")
 	private String password;
 	
 	@NotBlank(message="about field required")
