@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 			User savedUser = userRepo.save(user); // save to database
 			return this.userToUserDTO(savedUser);
 		} catch (Exception e) {
-			throw new ServiceInternalException(603, "error in the user service:createUser method");
+			throw new ServiceInternalException(603, "error in the user service:createUser method" + e.getMessage());
 		}
 	}
 
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 					.collect(Collectors.toList());
 			return userDTOList;
 		} catch (Exception e) {
-			throw new ServiceInternalException(605, "error in the user service:createUser method");
+			throw new ServiceInternalException(605, "error in the user service:createUser method" + e.getMessage());
 		}
 	}
 
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 			this.userRepo.delete(user);
 //		boolean alreadyexist=this.userRepo.existsById(userId);
 		} catch (Exception e) {
-			throw new ServiceInternalException(605, "error in the user service:deleteUser method");
+			throw new ServiceInternalException(605, "error in the user service:deleteUser method" + e.getMessage());
 		}
 
 	}

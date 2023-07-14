@@ -22,60 +22,76 @@ import com.demo.blog.services.CategoryService;
 
 /**
  * it handle all request related to category
+ * 
  * @author samundar singh rathore
  *
  */
 @RestController
-@RequestMapping(value= "/api/category")
+@RequestMapping(value = "/api/category")
 public class CategoryController {
-	
+
 	@Autowired
 	private CategoryService categoryService;
-	
+
 	/**
-	 * for creating resource of category
+	 * EndPoint for creating resource of category
+	 * 
 	 * @param categoryDTO
-	 * @return saved category object with id
+	 * @return newly saved category resource with id
 	 */
 	@PostMapping(value = "/")
-	public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryDTO categoryDTO){
-		CategoryDTO savedCategory=this.categoryService.createCategory(categoryDTO);
-		return new ResponseEntity<>(savedCategory,HttpStatus.CREATED);	
+	public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) throws Exception {
+		CategoryDTO savedCategory = this.categoryService.createCategory(categoryDTO);
+		return new ResponseEntity<CategoryDTO>(savedCategory, HttpStatus.CREATED);
 	}
-	
+
 	/**
-	 * for getting resource based on id
+	 * EndPoint for getting resource based on categoryId
+	 * 
 	 * @param categoryId
-	 * @return category object
+	 * @return category resource based on provided categoryId
 	 */
 	@GetMapping(value = "/{id}/")
-	public ResponseEntity<?> getCategory(@PathVariable(value="id") Integer categoryId){
-		CategoryDTO getCategory=this.categoryService.getCategoryById(categoryId);
-		return new ResponseEntity<>(getCategory,HttpStatus.FOUND);
+	public ResponseEntity<CategoryDTO> getCategory(@PathVariable(value = "id") Integer categoryId) throws Exception {
+		CategoryDTO getCategory = this.categoryService.getCategoryById(categoryId);
+		return new ResponseEntity<CategoryDTO>(getCategory, HttpStatus.FOUND);
 	}
-	
+
 	/**
-	 * for getting all saved categories 
-	 * @return
+	 * EndPoint for getting all saved categories resource
+	 * 
+	 * @return list of all saved resources
 	 */
-	@GetMapping(value="/")
-	public ResponseEntity<?> getCategories(){
-		List<CategoryDTO> listOfCategories=this.categoryService.getCategories();
-		return new ResponseEntity<>(listOfCategories,HttpStatus.FOUND);
+	@GetMapping(value = "/")
+	public ResponseEntity<List<CategoryDTO>> getCategories() throws Exception {
+		List<CategoryDTO> listOfCategories = this.categoryService.getCategories();
+		return new ResponseEntity<List<CategoryDTO>>(listOfCategories, HttpStatus.FOUND);
 	}
-	
-	@PutMapping(value="/{id}/")
-	public ResponseEntity<?> updateCategory(@RequestBody CategoryDTO categoryDTO,@PathVariable(value="id") Integer categoryId){
-		CategoryDTO updatedCategory=this.categoryService.updateCategoryById(categoryId, categoryDTO);
-		return new ResponseEntity<>(updatedCategory,HttpStatus.ACCEPTED);
+
+	/**
+	 * EndPoint for update category resource
+	 * 
+	 * @param categoryDTO
+	 * @param categoryId
+	 * @return updated category resource
+	 */
+	@PutMapping(value = "/{id}/")
+	public ResponseEntity<CategoryDTO> updateCategory(@RequestBody CategoryDTO categoryDTO,
+			@PathVariable(value = "id") Integer categoryId) throws Exception {
+		CategoryDTO updatedCategory = this.categoryService.updateCategoryById(categoryId, categoryDTO);
+		return new ResponseEntity<CategoryDTO>(updatedCategory, HttpStatus.ACCEPTED);
 	}
-	
-	@DeleteMapping(value="/{id}/")
-	public ResponseEntity<?> deleteCategory(@PathVariable(value = "id") Integer categoryId){
+
+	/**
+	 * EndPoint for delete resource by id
+	 * 
+	 * @param categoryId
+	 * @return response deleted successfully
+	 */
+	@DeleteMapping(value = "/{id}/")
+	public ResponseEntity<String> deleteCategory(@PathVariable(value = "id") Integer categoryId) throws Exception {
 		this.categoryService.deleteCategory(categoryId);
-		return new ResponseEntity<>("deleted sucessfully",HttpStatus.OK);
+		return new ResponseEntity<String>("deleted successfully", HttpStatus.OK);
 	}
-	
-	
 
 }
