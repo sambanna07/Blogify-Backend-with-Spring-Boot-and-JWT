@@ -32,10 +32,10 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-		Boolean existCategory=this.categoryRepo.existsByCategoryTitle(categoryDTO.getCategoryTitle());
+		Boolean existCategory = this.categoryRepo.existsByCategoryTitle(categoryDTO.getCategoryTitle());
 		System.out.println(existCategory);
-		if(existCategory) {
-			throw new AlreadyExistException(760,"category", "title", categoryDTO.getCategoryTitle());
+		if (existCategory) {
+			throw new AlreadyExistException(760, "category", "title", categoryDTO.getCategoryTitle());
 		}
 
 		try {
@@ -44,7 +44,8 @@ public class CategoryServiceImpl implements CategoryService {
 			return this.modelMapper.map(saveCategory, CategoryDTO.class);
 
 		} catch (Exception e) {
-			throw new ServiceInternalException(750, "internal problem in category service:createCategory method");
+			throw new ServiceInternalException(750,
+					"internal problem in category service:createCategory method" + e.getMessage());
 		}
 
 	}
@@ -62,7 +63,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 			return this.modelMapper.map(updateCategory, CategoryDTO.class);
 		} catch (Exception e) {
-			throw new ServiceInternalException(750, "internal problem in category service:updateCategoryById method");
+			throw new ServiceInternalException(750,
+					"internal problem in category service:updateCategoryById method" + e.getMessage());
 		}
 
 	}
@@ -76,7 +78,8 @@ public class CategoryServiceImpl implements CategoryService {
 		try {
 			return this.modelMapper.map(category, CategoryDTO.class);
 		} catch (Exception e) {
-			throw new ServiceInternalException(750, "internal problem in category service:getCategoryById method");
+			throw new ServiceInternalException(750,
+					"internal problem in category service:getCategoryById method" + e.getMessage());
 		}
 	}
 
@@ -91,7 +94,8 @@ public class CategoryServiceImpl implements CategoryService {
 					.map((category) -> this.modelMapper.map(category, CategoryDTO.class)).collect(Collectors.toList());
 			return listOfCategoriesDto;
 		} catch (Exception e) {
-			throw new ServiceInternalException(750, "internal problem in category service:getCategories method");
+			throw new ServiceInternalException(750,
+					"internal problem in category service:getCategories method" + e.getMessage());
 		}
 
 	}
@@ -105,7 +109,8 @@ public class CategoryServiceImpl implements CategoryService {
 				this.categoryRepo.deleteById(categoryId);
 			}
 		} catch (Exception e) {
-			throw new ServiceInternalException(750, "internal problem in category service:deleteCategory method");
+			throw new ServiceInternalException(750,
+					"internal problem in category service:deleteCategory method" + e.getMessage());
 		}
 
 		if (!categoryExists) {

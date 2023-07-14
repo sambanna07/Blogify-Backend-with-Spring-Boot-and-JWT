@@ -32,39 +32,59 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
-	//create new user
+	/**
+	 * EndPoint for create user resource
+	 * @param userDTO
+	 * @return newly created user resource with id
+	 */
 	@PostMapping(value = "/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> createUser(@Valid @RequestBody UserDTO userDTO){
+	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO)throws Exception{
 		UserDTO createUserDTO= this.userService.createUser(userDTO);
-		return new ResponseEntity<>(createUserDTO,HttpStatus.CREATED);
+		return new ResponseEntity<UserDTO>(createUserDTO,HttpStatus.CREATED);
 	}
 	
-	//get user by id
+	/**
+	 * EndPoint for getting user by id
+	 * @param userId
+	 * @return user resource based on provided userId
+	 */
 	@GetMapping(value = "/{id}/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getUserById(@PathVariable(value="id") Integer userId){
+	public ResponseEntity<UserDTO> getUserById(@PathVariable(value="id") Integer userId)throws Exception{
 		UserDTO userById= this.userService.getUserById(userId);
-		return new ResponseEntity<>(userById,HttpStatus.OK);
+		return new ResponseEntity<UserDTO>(userById,HttpStatus.OK);
 	}
 	
-	//get all user
+	/**
+	 * EndPoint for getting all user resource
+	 * @return list of user resource
+	 */
 	@GetMapping(value = "/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getUsers(){
+	public ResponseEntity<List<UserDTO>> getUsers()throws Exception{
 		List<UserDTO> userList = this.userService.getAllUser();
 		return ResponseEntity.ok(userList); //direct return
 	}
 	
-	//update user base on id
+	/**
+	 * EndPoint for update the user resource based on userId
+	 * @param userDTO
+	 * @param userId
+	 * @return updated user resource
+	 */
 	@PutMapping(value="/update",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO,@RequestParam(value = "id") Integer userId){
+	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO,@RequestParam(value = "id") Integer userId)throws Exception{
 		UserDTO updatedUser = this.userService.updateUser(userDTO, userId);
-		return new ResponseEntity<>(updatedUser,HttpStatus.OK);
+		return new ResponseEntity<UserDTO>(updatedUser,HttpStatus.OK);
 	}
 	
-	//delete user based on id
+	/**
+	 * EndPoint for delete user resource based on userId
+	 * @param userId
+	 * @return success message = user deleted successfully
+	 */
 	@DeleteMapping(value="",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> deleteUserById(@RequestParam(value = "id") Integer userId){
+	public ResponseEntity<String> deleteUserById(@RequestParam(value = "id") Integer userId)throws Exception{
 		this.userService.deleteUser(userId);
-		return new ResponseEntity<>("deleted",HttpStatus.ACCEPTED);
+		return new ResponseEntity<String>("user deleted successfully",HttpStatus.ACCEPTED);
 	}
 
 }
