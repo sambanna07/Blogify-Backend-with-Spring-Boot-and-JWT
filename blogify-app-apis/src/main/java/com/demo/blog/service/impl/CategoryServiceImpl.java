@@ -1,10 +1,14 @@
 package com.demo.blog.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.Category;
@@ -12,6 +16,7 @@ import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
 import com.demo.blog.exceptions.ServiceInternalException;
 import com.demo.blog.payload.CategoryDTO;
+import com.demo.blog.payload.CategoryResponse;
 import com.demo.blog.reposistories.CategoryRepo;
 import com.demo.blog.services.CategoryService;
 
@@ -55,6 +60,13 @@ public class CategoryServiceImpl implements CategoryService {
 
 		Category category = this.categoryRepo.findById(categoryId)
 				.orElseThrow(() -> new ResourceNotFoundException(701, "category", "id", categoryId));
+		Optional<Category> categoryByTitle=Optional.ofNullable(this.categoryRepo.findByCategoryTitle(categoryDTO.getCategoryTitle()));
+		if(categoryByTitle.isPresent()) {
+			Category categoryOptional= categoryByTitle.get();
+			if(categoryOptional.getCategoryId()!=categoryId) {
+				throw new AlreadyExistException(750,"Category", "category title",categoryDTO.getCategoryTitle());
+			}
+		}
 		try {
 			category.setCategoryTitle(categoryDTO.getCategoryTitle());
 			category.setCategoryDescription(categoryDTO.getCategoryDescription());
@@ -84,15 +96,38 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
-	public List<CategoryDTO> getCategories() {
-		List<Category> listOfCategories = this.categoryRepo.findAll();
-		if (listOfCategories.size() == 0) {
-			throw new ResourceNotFoundException(703, "categories");
+	public CategoryResponse getAllCategory(Integer pageNumber,Integer pageSize) {
+		Pageable pageable=PageRequest.of(pageNumber,pageSize);
+		Page<Category> pageData = this.categoryRepo.findAll(pageable);
+
+		if (pageData.getTotalElements() == 0) {
+			throw new ResourceNotFoundException(703, "There is no category available in database");
+		}
+		if (pageData.getTotalElements() != 0 && pageData.isEmpty()==true) {
+			throw new ResourceNotFoundException(703, "You are on wrong page,Please go to right page");
 		}
 		try {
-			List<CategoryDTO> listOfCategoriesDto = listOfCategories.stream()
-					.map((category) -> this.modelMapper.map(category, CategoryDTO.class)).collect(Collectors.toList());
-			return listOfCategoriesDto;
+			CategoryResponse category=new CategoryResponse();
+			List<Category> content = pageData.getContent();
+			System.out.println(content);
+			List<CategoryDTO> listOfCategoriesDto = content.stream()
+					.map((cat) -> this.modelMapper.map(cat, CategoryDTO.class)).collect(Collectors.toList());
+			//set content
+			category.setCategoryContent(listOfCategoriesDto);
+			//set page number
+			category.setPageNumber(pageData.getNumber());
+			//set number of elements in that page
+			category.setNumberOfElements(pageData.getNumberOfElements());
+			//set total elements in data base
+			category.setTotalElements(pageData.getTotalElements());
+			//set total pages
+			category.setTotalpages(pageData.getTotalPages());
+			//set that is first page or not
+			category.setFirstPage(pageData.isFirst());
+			//set that is last page or not
+			category.setLastPage(pageData.isLast());
+			
+			return category;
 		} catch (Exception e) {
 			throw new ServiceInternalException(750,
 					"internal problem in category service:getCategories method" + e.getMessage());

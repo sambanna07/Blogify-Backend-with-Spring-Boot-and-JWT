@@ -2,10 +2,14 @@ package com.demo.blog.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.Category;
@@ -15,6 +19,7 @@ import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
 import com.demo.blog.exceptions.ServiceInternalException;
 import com.demo.blog.payload.PostDTO;
+import com.demo.blog.payload.PostResponse;
 import com.demo.blog.reposistories.CategoryRepo;
 import com.demo.blog.reposistories.PostRepo;
 import com.demo.blog.reposistories.UserRepo;
@@ -88,7 +93,14 @@ public class PostServiceImpl implements PostService {
 	public PostDTO updatePost(PostDTO postDTO, Integer postId) {
 
 		Post post = this.postRepo.findById(postId)
-				.orElseThrow(() -> new ResourceNotFoundException(804, "post", "post_id", postId));;
+				.orElseThrow(() -> new ResourceNotFoundException(804, "post", "post_id", postId));
+		;
+		Optional<Post> postByTitle = Optional.ofNullable(this.postRepo.findByPostTitle(postDTO.getPostTitle()));
+		if (postByTitle.isPresent()) {
+			if (postByTitle.get().getPostId() != postId) {
+				throw new AlreadyExistException(812, "Post", "post title", postDTO.getPostTitle());
+			}
+		}
 		try {
 			post.setPostTitle(postDTO.getPostTitle());
 			post.setPostContent(postDTO.getPostContent());
@@ -153,15 +165,34 @@ public class PostServiceImpl implements PostService {
 	 * @return returns list of PostDTO object to controller
 	 */
 	@Override
-	public List<PostDTO> getAllPost() {
-		List<Post> listOfPost = this.postRepo.findAll();
-		if (listOfPost.size() == 0) {
-			throw new ResourceNotFoundException(809, "post");
+	public PostResponse getAllPost(Integer pageNumber, Integer pageSize) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Page<Post> pagePost = this.postRepo.findAll(pageable);
+		if (pagePost.isEmpty() && pagePost.isLast() == true) {
+			throw new ResourceNotFoundException(809, "please give correct page number");
+		}
+		if (pagePost.isEmpty() && pagePost.isFirst() == true) {
+			throw new ResourceNotFoundException(809, "In database there is no post,please try after some time");
 		}
 		try {
-			List<PostDTO> listOfPostDTO = listOfPost.stream().map((post) -> this.modelMapper.map(post, PostDTO.class))
+			List<Post> posts = pagePost.getContent();
+			List<PostDTO> listOfPostDTO = posts.stream().map((post) -> this.modelMapper.map(post, PostDTO.class))
 					.collect(Collectors.toList());
-			return listOfPostDTO;
+			PostResponse postResponse = new PostResponse();
+			postResponse.setPostContent(listOfPostDTO);
+			// current page number
+			postResponse.setPageNumber(pagePost.getNumber());
+			// current page size means elements in that particular page
+			postResponse.setNumberOfElements(pagePost.getNumberOfElements());
+			// total element in pageable object
+			postResponse.setTotalElements(pagePost.getTotalElements());
+			// total number of page
+			postResponse.setTotalpages(pagePost.getTotalPages());
+			// is this last page
+			postResponse.setLastPage(pagePost.isLast());
+			// is this is first page
+			postResponse.setFirstPage(pagePost.isFirst());
+			return postResponse;
 		} catch (Exception e) {
 			throw new ServiceInternalException(810,
 					"something went wrong in PostService:getAllPost method" + e.getMessage());
@@ -183,7 +214,8 @@ public class PostServiceImpl implements PostService {
 				.orElseThrow(() -> new ResourceNotFoundException(816, "category", "category id", categoryId));
 		List<Post> listOfPostByCategory = this.postRepo.findByCategory(category);
 		if (listOfPostByCategory.size() == 0) {
-			throw new ResourceNotFoundException(811, "list of post related to category");
+			throw new ResourceNotFoundException(811,
+					"for " + category.getCategoryTitle() + " ,there is no active post");
 		}
 		try {
 			List<PostDTO> listOfPostDTOByCategory = listOfPostByCategory.stream()
@@ -210,7 +242,7 @@ public class PostServiceImpl implements PostService {
 				.orElseThrow(() -> new ResourceNotFoundException(815, "User", "user id", userId));
 		List<Post> listOfPostByUser = this.postRepo.findByUser(user);
 		if (listOfPostByUser.size() == 0) {
-			throw new ResourceNotFoundException(813, "list of post related to category");
+			throw new ResourceNotFoundException(813, "yet " + user.getName() + " post any blog");
 		}
 		try {
 			List<PostDTO> listOfPostDTOByUser = listOfPostByUser.stream()

@@ -1,10 +1,15 @@
 package com.demo.blog.service.impl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.User;
@@ -12,6 +17,7 @@ import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
 import com.demo.blog.exceptions.ServiceInternalException;
 import com.demo.blog.payload.UserDTO;
+import com.demo.blog.payload.UserResponse;
 import com.demo.blog.reposistories.UserRepo;
 import com.demo.blog.services.UserService;
 
@@ -43,7 +49,7 @@ public class UserServiceImpl implements UserService {
 			User savedUser = userRepo.save(user); // save to database
 			return this.userToUserDTO(savedUser);
 		} catch (Exception e) {
-			throw new ServiceInternalException(603, "error in the user service:createUser method" + e.getMessage());
+			throw new ServiceInternalException(611, "error in the user service:createUser method" + e.getMessage());
 		}
 	}
 
@@ -52,14 +58,25 @@ public class UserServiceImpl implements UserService {
 		// fetch user based on id,if user not available then throw exception
 		User user = this.userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(602, "user", "id", userId));
+		Optional<User> userByEmail = Optional.ofNullable(this.userRepo.findByEmail(userDTO.getEmail()));
+		if (userByEmail.isPresent()) {
+		  User userOptional = userByEmail.get();
+		  if (userOptional.getId() != userId) {
+		    throw new AlreadyExistException(601, "user", "email", userDTO.getEmail());
+		  }
+		} 
+		try {
+			user.setName(userDTO.getName());
+			user.setEmail(userDTO.getEmail());
+			user.setPassword(userDTO.getPassword());
+			user.setAbout(userDTO.getAbout());
+			User updatedUser = this.userRepo.save(user);
+			return this.userToUserDTO(updatedUser);
 
-		user.setName(userDTO.getName());
-		user.setEmail(userDTO.getEmail());
-		user.setPassword(userDTO.getPassword());
-		user.setAbout(userDTO.getAbout());
-
-		User updatedUser = this.userRepo.save(user);
-		return this.userToUserDTO(updatedUser);
+		} catch (Exception e) {
+			throw new ServiceInternalException(611, "error in the user service:updateUser method" + e.getMessage());
+              
+		}
 	}
 
 	@Override
@@ -70,18 +87,38 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDTO> getAllUser() {
-		List<User> userList = this.userRepo.findAll();
-		if (userList.size() == 0) {
-			throw new ResourceNotFoundException(604, "users");
+	public UserResponse getAllUser(Integer pageNumber,Integer numberOfElements) {
+		Pageable pageable=PageRequest.of(pageNumber,numberOfElements);
+		Page<User> pageData = this.userRepo.findAll(pageable);
+		if (pageData.getTotalElements()==0) {
+			throw new ResourceNotFoundException(604, "there is no user in data base");
+		}
+		if (pageData.getTotalElements()!=0 && pageData.isEmpty()==true) {
+			throw new ResourceNotFoundException(604, "in given page there is no data,Please give correct pagenumber");
 		}
 		try {
+			List<User> content = pageData.getContent();
 			// convert user list to userdto list
-			List<UserDTO> userDTOList = userList.stream().map(user -> this.userToUserDTO(user))
+			List<UserDTO> userDTOList = content.stream().map(user -> this.userToUserDTO(user))
 					.collect(Collectors.toList());
-			return userDTOList;
+			UserResponse userResponse=new UserResponse();
+			//set user into userdto class
+			userResponse.setUserContent(userDTOList);
+			//set current page
+			userResponse.setPageNumber(pageData.getNumber());
+			//set elements on that page
+			userResponse.setNumberOfElements(pageData.getNumberOfElements());
+			//set total pages
+			userResponse.setTotalpages(pageData.getTotalPages());
+			//set total elements
+			userResponse.setTotalElements(pageData.getTotalElements());
+			//set that is first page or not
+			userResponse.setFirstPage(pageData.isFirst());
+			//set that is last page or not
+			userResponse.setLastPage(pageData.isLast());
+			return userResponse;
 		} catch (Exception e) {
-			throw new ServiceInternalException(605, "error in the user service:createUser method" + e.getMessage());
+			throw new ServiceInternalException(611, "error in the user service:createUser method" + e.getMessage());
 		}
 	}
 
@@ -93,7 +130,7 @@ public class UserServiceImpl implements UserService {
 			this.userRepo.delete(user);
 //		boolean alreadyexist=this.userRepo.existsById(userId);
 		} catch (Exception e) {
-			throw new ServiceInternalException(605, "error in the user service:deleteUser method" + e.getMessage());
+			throw new ServiceInternalException(611, "error in the user service:deleteUser method" + e.getMessage());
 		}
 
 	}

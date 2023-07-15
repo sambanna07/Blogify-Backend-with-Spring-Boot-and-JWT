@@ -2,6 +2,7 @@ package com.demo.blog.services;
 import java.util.List;
 
 import com.demo.blog.payload.UserDTO;
+import com.demo.blog.payload.UserResponse;
 /**
  * 
  * @author Samundar Singh Rathore
@@ -35,7 +36,7 @@ public interface UserService {
 	  * 
 	  * @return List of user
 	  */
-	 List<UserDTO> getAllUser();
+	 UserResponse getAllUser(Integer pageNumber,Integer numberOfElements);
 	 
 	 /**
 	  * for deleting the user based on id

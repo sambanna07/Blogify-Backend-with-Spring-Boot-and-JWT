@@ -7,5 +7,7 @@ import com.demo.blog.entity.Category;
 public interface CategoryRepo extends JpaRepository<Category, Integer> {
 	
 	Boolean existsByCategoryTitle(String categoryTitle);
+	
+    Category findByCategoryTitle(String categoryTitle);
 
 }

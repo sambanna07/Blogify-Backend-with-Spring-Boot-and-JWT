@@ -30,5 +30,12 @@ public interface PostRepo extends JpaRepository<Post,Integer> {
 	 * @return true if post is already in database otherwise false
 	 */
 	Boolean existsByPostTitle(String postTitle);
+	
+	/**
+	 * checking data with that title post is available or not
+	 * @param postTitle
+	 * @return Post resource if post title is already in database otherwise null
+	 */
+	Post findByPostTitle(String postTitle);
 
 }

@@ -3,8 +3,6 @@ package com.demo.blog.advice;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +19,8 @@ import com.demo.blog.exceptions.AlreadyExistException;
 import com.demo.blog.exceptions.ResourceNotFoundException;
 import com.demo.blog.exceptions.ServiceInternalException;
 
-import lombok.extern.java.Log;
-
 @RestControllerAdvice
-@Log
-public class UserControllerAdvice  {
+public class UserControllerAdvice extends ResponseEntityExceptionHandler {
 
 	private static final String RESOURCE_NOT_FOUND = null;
 
@@ -36,7 +31,7 @@ public class UserControllerAdvice  {
 	 * @return
 	 */
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<?> handleResourceNotFoundException (ResourceNotFoundException resourceNotFoundException) {
+	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException resourceNotFoundException) {
 		return ResponseEntity.status(resourceNotFoundException.getErrorCode())
 				.body(resourceNotFoundException.getMessage());
 
@@ -63,7 +58,7 @@ public class UserControllerAdvice  {
 	 * @return ResponseEntity<Object> containing the error message and HTTP status
 	 *         code
 	 */
-//	@Override
+	@Override
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		return new ResponseEntity<>(
@@ -74,7 +69,8 @@ public class UserControllerAdvice  {
 	/**
 	 * handle if user give not valid data
 	 */
-//	@Override
+	@Override
+//	@ExceptionHandler(MethodArgumentNotValidException.class)
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		Map<String, String> resp = new HashMap();
@@ -93,12 +89,39 @@ public class UserControllerAdvice  {
 				.body(serviceInternalException.getMessage());
 
 	}
-	
+
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleException(Exception exception){
-		return new ResponseEntity<>(exception.getMessage(),HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> handleException(Exception exception) {
+		return new ResponseEntity<>("Something went wrong due : " + exception.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(NumberFormatException.class)
+	public ResponseEntity<String> handleNumberFormatException(NumberFormatException numberFormatException) {
+		return new ResponseEntity<String>(
+				"in url you are giving wrong format data" + numberFormatException.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 	
+    /**
+     * Handles MethodArgumentTypeMismatchException and returns an appropriate
+     * response entity with error message and HTTP status code.
+     *
+     * @param ex      the MethodArgumentTypeMismatchException to handle
+     * @param headers the HttpHeaders of the request
+     * @param request the WebRequest
+     * @return ResponseEntity<Object> containing the error message and HTTP status code
+     */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<String> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
+	                                                               HttpHeaders headers,
+	                                                               HttpStatus status,
+	                                                               WebRequest request) {
+	    String errorMessage = "Failed to convert value of type '" +
+	            ex.getValue().toString() +
+	            "' to required type '" +
+	            ex.getRequiredType().getSimpleName() +
+	            "'";
+	    return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+	}
 
 
 }
