@@ -2,6 +2,7 @@ package com.demo.blog.services;
 import java.util.List;
 
 import com.demo.blog.payload.PostDTO;
+import com.demo.blog.payload.PostResponse;
 /**
  * service interface for post
  * @author Samundar Singh Rathore
@@ -40,7 +41,7 @@ public interface PostService {
 	 * fetch all available posts in database
 	 * @return list of PostDTO objects
 	 */
-	List<PostDTO> getAllPost();
+	PostResponse getAllPost(Integer pageNumber,Integer pageSize);
 	
 	/**
 	 * fetch all post related to that category

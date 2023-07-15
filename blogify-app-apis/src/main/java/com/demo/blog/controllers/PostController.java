@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.demo.blog.payload.PostDTO;
+import com.demo.blog.payload.PostResponse;
 import com.demo.blog.services.PostService;
 
 @RestController
@@ -59,10 +60,10 @@ public class PostController {
 	 * 
 	 * @return All Post resource saved in database
 	 */
-	@GetMapping(value = "/")
-	public ResponseEntity<List<PostDTO>> getAllPost()throws Exception {
-		List<PostDTO> posts = this.postService.getAllPost();
-		return new ResponseEntity<List<PostDTO>>(posts, HttpStatus.OK);
+	@GetMapping(value = "/posts")
+	public ResponseEntity<PostResponse> getAllPost(@RequestParam(value = "pageNumber",defaultValue = "0",required = false)Integer pageNumber,@RequestParam(value = "pageSize",defaultValue = "5",required = false)Integer pageSize)throws Exception {
+		PostResponse posts = this.postService.getAllPost(pageNumber, pageSize);
+		return new ResponseEntity<PostResponse>(posts, HttpStatus.OK);
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class PostController {
 	}
 	
 	@DeleteMapping(value = "/{postid}/")
-	public ResponseEntity<String> deletePostById(@PathVariable(value="postid") Integer postId){
+	public ResponseEntity<String> deletePostById(@PathVariable(value = "postid") Integer postId){
 		this.postService.deletePostById(postId);
 		return new ResponseEntity<String>("post deleted",HttpStatus.OK);
 	}

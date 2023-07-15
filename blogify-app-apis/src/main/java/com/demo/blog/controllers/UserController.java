@@ -24,10 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 import com.demo.blog.payload.UserDTO;
+import com.demo.blog.payload.UserResponse;
 import com.demo.blog.services.UserService;
+
+import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping(value ="/api/users")
+@Slf4j
 public class UserController {
+	
+
 	
 	@Autowired
 	private UserService userService;
@@ -58,9 +64,9 @@ public class UserController {
 	 * EndPoint for getting all user resource
 	 * @return list of user resource
 	 */
-	@GetMapping(value = "/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<UserDTO>> getUsers()throws Exception{
-		List<UserDTO> userList = this.userService.getAllUser();
+	@GetMapping(value = "/users",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserResponse> getUsers(@RequestParam(value = "pageNumber",defaultValue = "0",required = false)Integer pageNumber,@RequestParam(value = "pageSize",defaultValue = "5",required = false)Integer pageSize)throws Exception{
+		UserResponse userList = this.userService.getAllUser(pageNumber, pageSize);
 		return ResponseEntity.ok(userList); //direct return
 	}
 	

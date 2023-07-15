@@ -39,7 +39,7 @@ public class ResourceNotFoundException extends RuntimeException{
 	 * @param resourceName
 	 */
 	public ResourceNotFoundException(Integer errorCode, String resourceName) {
-		super(String.format("there is no data for %S", resourceName));
+		super(String.format("%S", resourceName));
 		this.errorCode=errorCode;
 		this.resourceName = resourceName;
 	} 

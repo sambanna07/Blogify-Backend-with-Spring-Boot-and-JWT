@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.demo.blog.payload.CategoryDTO;
+import com.demo.blog.payload.CategoryResponse;
 import com.demo.blog.services.CategoryService;
 
 /**
@@ -62,10 +64,10 @@ public class CategoryController {
 	 * 
 	 * @return list of all saved resources
 	 */
-	@GetMapping(value = "/")
-	public ResponseEntity<List<CategoryDTO>> getCategories() throws Exception {
-		List<CategoryDTO> listOfCategories = this.categoryService.getCategories();
-		return new ResponseEntity<List<CategoryDTO>>(listOfCategories, HttpStatus.FOUND);
+	@GetMapping(value = "/categories")
+	public ResponseEntity<CategoryResponse> getCategories(@RequestParam(value = "pageNumber",defaultValue = "0",required = false)Integer pageNumber,@RequestParam(value = "pageSize",defaultValue = "5",required = false)Integer pageSize) throws Exception {
+		CategoryResponse response= this.categoryService.getAllCategory(pageNumber, pageSize);
+		return new ResponseEntity<CategoryResponse>(response, HttpStatus.FOUND);
 	}
 
 	/**

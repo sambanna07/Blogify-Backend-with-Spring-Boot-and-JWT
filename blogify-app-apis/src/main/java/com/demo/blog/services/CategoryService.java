@@ -2,6 +2,7 @@ package com.demo.blog.services;
 import java.util.List;
 
 import com.demo.blog.payload.CategoryDTO;
+import com.demo.blog.payload.CategoryResponse;
 /**
  * interface contains all category api service abstract methods
  * @author Samundar Singh Rathore
@@ -35,7 +36,7 @@ public interface CategoryService {
 	 * get all categories
 	 * @return
 	 */
-	List<CategoryDTO> getCategories();
+	CategoryResponse getAllCategory(Integer pageNumber,Integer pageSize);
 	
 	/**
 	 * delete category by id
