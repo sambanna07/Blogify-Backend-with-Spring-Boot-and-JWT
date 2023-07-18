@@ -3,10 +3,13 @@ package com.demo.blog.reposistories;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.demo.blog.entity.Category;
 import com.demo.blog.entity.Post;
 import com.demo.blog.entity.User;
+import com.demo.blog.payload.PostDTO;
 
 public interface PostRepo extends JpaRepository<Post,Integer> {
 	
@@ -37,5 +40,14 @@ public interface PostRepo extends JpaRepository<Post,Integer> {
 	 * @return Post resource if post title is already in database otherwise null
 	 */
 	Post findByPostTitle(String postTitle);
+	
+	/**
+	 * searching the post based on post_title
+	 * @param title
+	 * @return Related postdtos based on keyword
+	 */
+	@Query("select p from Post p where p.postTitle like :key ")
+	List<Post> searchPostByTitle(@Param("key")String title);
+	
 
 }

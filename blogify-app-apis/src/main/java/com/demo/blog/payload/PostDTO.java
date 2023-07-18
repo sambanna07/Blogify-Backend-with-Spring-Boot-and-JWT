@@ -28,13 +28,13 @@ public class PostDTO {
 	
 
 	@NotBlank(message = "post title must required")
-	@Size(min =10,message = "minimum 10 characters required")
+	@Size(min =3,message = "minimum 3 characters required")
 	@Size(max = 100,message = "more than 500 characters not allowed")
 	private String postTitle;
 	
 
 	@NotBlank(message = "post content must required")
-	@Size(min =500,message = "minimum 500 characters required")
+	@Size(min =10,message = "minimum 10 characters required")
 	@Size(max = 5000,message = "more than 5000 characters not allowed")
 	private String postContent;
 	
