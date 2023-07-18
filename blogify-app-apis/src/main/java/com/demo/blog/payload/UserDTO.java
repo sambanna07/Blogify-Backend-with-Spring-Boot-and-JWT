@@ -1,5 +1,8 @@
 package com.demo.blog.payload;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -33,6 +36,8 @@ public class UserDTO {
 	@NotBlank(message="about field required")
 	@Length(min = 15,message = "minimum 15 letters required for about filed")
 	private String about;
+	
+	private Set<CommentsDTO> comments=new HashSet<>();
 	
 
 }
