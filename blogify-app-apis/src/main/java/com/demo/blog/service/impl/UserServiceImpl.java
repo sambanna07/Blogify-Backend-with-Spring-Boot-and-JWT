@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.User;
@@ -60,11 +61,11 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new ResourceNotFoundException(602, "user", "id", userId));
 		Optional<User> userByEmail = Optional.ofNullable(this.userRepo.findByEmail(userDTO.getEmail()));
 		if (userByEmail.isPresent()) {
-		  User userOptional = userByEmail.get();
-		  if (userOptional.getId() != userId) {
-		    throw new AlreadyExistException(601, "user", "email", userDTO.getEmail());
-		  }
-		} 
+			User userOptional = userByEmail.get();
+			if (userOptional.getId() != userId) {
+				throw new AlreadyExistException(601, "user", "email", userDTO.getEmail());
+			}
+		}
 		try {
 			user.setName(userDTO.getName());
 			user.setEmail(userDTO.getEmail());
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
 		} catch (Exception e) {
 			throw new ServiceInternalException(611, "error in the user service:updateUser method" + e.getMessage());
-              
+
 		}
 	}
 
@@ -87,13 +88,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserResponse getAllUser(Integer pageNumber,Integer numberOfElements) {
-		Pageable pageable=PageRequest.of(pageNumber,numberOfElements);
+	public UserResponse getAllUser(Integer pageNumber, Integer numberOfElements, String sortBy, String sortDir) {
+		Sort sort = (sortDir.equalsIgnoreCase("asc")) ?
+		        Sort.by(sortBy).ascending() :
+		                Sort.by(sortBy).descending();
+
+		Pageable pageable = PageRequest.of(pageNumber, numberOfElements,sort);
+
 		Page<User> pageData = this.userRepo.findAll(pageable);
-		if (pageData.getTotalElements()==0) {
+		if (pageData.getTotalElements() == 0) {
 			throw new ResourceNotFoundException(604, "there is no user in data base");
 		}
-		if (pageData.getTotalElements()!=0 && pageData.isEmpty()==true) {
+		if (pageData.getTotalElements() != 0 && pageData.isEmpty() == true) {
 			throw new ResourceNotFoundException(604, "in given page there is no data,Please give correct pagenumber");
 		}
 		try {
@@ -101,20 +107,20 @@ public class UserServiceImpl implements UserService {
 			// convert user list to userdto list
 			List<UserDTO> userDTOList = content.stream().map(user -> this.userToUserDTO(user))
 					.collect(Collectors.toList());
-			UserResponse userResponse=new UserResponse();
-			//set user into userdto class
+			UserResponse userResponse = new UserResponse();
+			// set user into userdto class
 			userResponse.setUserContent(userDTOList);
-			//set current page
+			// set current page
 			userResponse.setPageNumber(pageData.getNumber());
-			//set elements on that page
+			// set elements on that page
 			userResponse.setNumberOfElements(pageData.getNumberOfElements());
-			//set total pages
+			// set total pages
 			userResponse.setTotalpages(pageData.getTotalPages());
-			//set total elements
+			// set total elements
 			userResponse.setTotalElements(pageData.getTotalElements());
-			//set that is first page or not
+			// set that is first page or not
 			userResponse.setFirstPage(pageData.isFirst());
-			//set that is last page or not
+			// set that is last page or not
 			userResponse.setLastPage(pageData.isLast());
 			return userResponse;
 		} catch (Exception e) {
@@ -171,6 +177,20 @@ public class UserServiceImpl implements UserService {
 //		userDTO.setAbout(user.getAbout());
 
 		return userDTO;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public List<UserDTO> findByNameContaining(String keyword) {
+		List<User> containingUsers = this.userRepo.findByNameContaining(keyword);
+		List<UserDTO> listDtos = containingUsers.stream().map( (user) -> this.modelMapper.map(user,UserDTO.class)
+				).collect(Collectors.toList());
+		if(listDtos.size()==0) {
+			throw new ResourceNotFoundException(612,"there is no user available wiht keyword "+keyword);
+		}
+		return listDtos;
 	}
 
 }

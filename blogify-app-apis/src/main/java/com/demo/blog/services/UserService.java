@@ -1,6 +1,7 @@
 package com.demo.blog.services;
 import java.util.List;
 
+import com.demo.blog.entity.User;
 import com.demo.blog.payload.UserDTO;
 import com.demo.blog.payload.UserResponse;
 /**
@@ -36,12 +37,19 @@ public interface UserService {
 	  * 
 	  * @return List of user
 	  */
-	 UserResponse getAllUser(Integer pageNumber,Integer numberOfElements);
+	 UserResponse getAllUser(Integer pageNumber,Integer numberOfElements,String sortBy,String sortDir);
 	 
 	 /**
 	  * for deleting the user based on id
 	  * @param userId
 	  */
 	 void deleteUser(Integer userId);
+	 
+	 /**
+	  * searching the user based on username
+	  * @param name
+	  * @return list of userdtos
+	  */
+	 List<UserDTO> findByNameContaining(String name);
 
 }

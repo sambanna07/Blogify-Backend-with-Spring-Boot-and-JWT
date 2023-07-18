@@ -23,74 +23,91 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 
+import com.demo.blog.configurations.AppConstants;
 import com.demo.blog.payload.UserDTO;
 import com.demo.blog.payload.UserResponse;
 import com.demo.blog.services.UserService;
 
 import lombok.extern.slf4j.Slf4j;
+
 @RestController
-@RequestMapping(value ="/api/users")
+@RequestMapping(value = "/api/users")
 @Slf4j
 public class UserController {
-	
 
-	
 	@Autowired
 	private UserService userService;
-	
+
 	/**
 	 * EndPoint for create user resource
+	 * 
 	 * @param userDTO
 	 * @return newly created user resource with id
 	 */
-	@PostMapping(value = "/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO)throws Exception{
-		UserDTO createUserDTO= this.userService.createUser(userDTO);
-		return new ResponseEntity<UserDTO>(createUserDTO,HttpStatus.CREATED);
+	@PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) throws Exception {
+		UserDTO createUserDTO = this.userService.createUser(userDTO);
+		return new ResponseEntity<UserDTO>(createUserDTO, HttpStatus.CREATED);
 	}
-	
+
 	/**
 	 * EndPoint for getting user by id
+	 * 
 	 * @param userId
 	 * @return user resource based on provided userId
 	 */
-	@GetMapping(value = "/{id}/",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> getUserById(@PathVariable(value="id") Integer userId)throws Exception{
-		UserDTO userById= this.userService.getUserById(userId);
-		return new ResponseEntity<UserDTO>(userById,HttpStatus.OK);
+	@GetMapping(value = "/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserDTO> getUserById(@PathVariable(value = "id") Integer userId) throws Exception {
+		UserDTO userById = this.userService.getUserById(userId);
+		return new ResponseEntity<UserDTO>(userById, HttpStatus.OK);
 	}
-	
+
 	/**
 	 * EndPoint for getting all user resource
+	 * 
 	 * @return list of user resource
 	 */
-	@GetMapping(value = "/users",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserResponse> getUsers(@RequestParam(value = "pageNumber",defaultValue = "0",required = false)Integer pageNumber,@RequestParam(value = "pageSize",defaultValue = "5",required = false)Integer pageSize)throws Exception{
-		UserResponse userList = this.userService.getAllUser(pageNumber, pageSize);
-		return ResponseEntity.ok(userList); //direct return
+	@GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserResponse> getUsers(
+			@RequestParam(value = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = "sortBy",defaultValue = AppConstants.SORT_BY_USERID,required = false) String sortBy,
+			@RequestParam(value = "sortDir",defaultValue = AppConstants.SORT_DIR,required = false) String sortDir
+			) throws Exception {
+		UserResponse userList = this.userService.getAllUser(pageNumber, pageSize,sortBy,sortDir);
+		return ResponseEntity.ok(userList); // direct return
 	}
-	
+
 	/**
 	 * EndPoint for update the user resource based on userId
+	 * 
 	 * @param userDTO
 	 * @param userId
 	 * @return updated user resource
 	 */
-	@PutMapping(value="/update",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO,@RequestParam(value = "id") Integer userId)throws Exception{
+	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO,
+			@RequestParam(value = "id") Integer userId) throws Exception {
 		UserDTO updatedUser = this.userService.updateUser(userDTO, userId);
-		return new ResponseEntity<UserDTO>(updatedUser,HttpStatus.OK);
+		return new ResponseEntity<UserDTO>(updatedUser, HttpStatus.OK);
 	}
-	
+
 	/**
 	 * EndPoint for delete user resource based on userId
+	 * 
 	 * @param userId
 	 * @return success message = user deleted successfully
 	 */
-	@DeleteMapping(value="",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> deleteUserById(@RequestParam(value = "id") Integer userId)throws Exception{
+	@DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> deleteUserById(@RequestParam(value = "id") Integer userId) throws Exception {
 		this.userService.deleteUser(userId);
-		return new ResponseEntity<String>("user deleted successfully",HttpStatus.ACCEPTED);
+		return new ResponseEntity<String>("user deleted successfully", HttpStatus.ACCEPTED);
+	}
+	
+	@GetMapping(value = "/search")
+	public ResponseEntity<List<UserDTO>> findUserBykeyword(@RequestParam(value = "keyword") String keyword){
+		List<UserDTO> matchingUsers = this.userService.findByNameContaining(keyword);
+		return new ResponseEntity<List<UserDTO>>(matchingUsers,HttpStatus.OK);
 	}
 
 }

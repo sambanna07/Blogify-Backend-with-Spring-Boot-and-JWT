@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.demo.blog.entity.Category;
@@ -165,11 +166,12 @@ public class PostServiceImpl implements PostService {
 	 * @return returns list of PostDTO object to controller
 	 */
 	@Override
-	public PostResponse getAllPost(Integer pageNumber, Integer pageSize) {
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+	public PostResponse getAllPost(Integer pageNumber, Integer pageSize,String sortBy,String sortDir) {
+		Sort sort=(sortDir.equalsIgnoreCase("asc"))?Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
 		Page<Post> pagePost = this.postRepo.findAll(pageable);
 		if (pagePost.isEmpty() && pagePost.isLast() == true) {
-			throw new ResourceNotFoundException(809, "please give correct page number");
+			throw new ResourceNotFoundException(809, "please give correct page number,In this there is no data");
 		}
 		if (pagePost.isEmpty() && pagePost.isFirst() == true) {
 			throw new ResourceNotFoundException(809, "In database there is no post,please try after some time");
@@ -240,9 +242,11 @@ public class PostServiceImpl implements PostService {
 	public List<PostDTO> getPostsByUserId(Integer userId) {
 		User user = this.userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(815, "User", "user id", userId));
+//		Sort sort=
+//		Pageable pageable=PageRequest.of(pageNumber,pageSize, null);
 		List<Post> listOfPostByUser = this.postRepo.findByUser(user);
 		if (listOfPostByUser.size() == 0) {
-			throw new ResourceNotFoundException(813, "yet " + user.getName() + " post any blog");
+			throw new ResourceNotFoundException(813, "yet " + user.getName() + " not post any blog");
 		}
 		try {
 			List<PostDTO> listOfPostDTOByUser = listOfPostByUser.stream()
@@ -254,5 +258,17 @@ public class PostServiceImpl implements PostService {
 		}
 
 	}
+
+	@Override
+	public List<PostDTO> searchPostByTitle(String keyword) {
+		List<Post> postBasedOnSearching = this.postRepo.searchPostByTitle("%"+keyword+"%");
+		if(postBasedOnSearching.size()==0) {
+			throw new ResourceNotFoundException(815,"there is no data with matching post title :"+keyword);
+		}
+		List<PostDTO> postDTOs = postBasedOnSearching.stream().map(post -> this.modelMapper.map(post,PostDTO.class)).collect(Collectors.toList());
+		return postDTOs;
+	}
+
+
 
 }
