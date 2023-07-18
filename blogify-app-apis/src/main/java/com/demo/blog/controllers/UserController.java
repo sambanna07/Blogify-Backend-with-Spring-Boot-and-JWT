@@ -104,6 +104,11 @@ public class UserController {
 		return new ResponseEntity<String>("user deleted successfully", HttpStatus.ACCEPTED);
 	}
 	
+	/**
+	 * End point for searching post resource based on keyword
+	 * @param keyword
+	 * @return list of dtos based on keyword
+	 */
 	@GetMapping(value = "/search")
 	public ResponseEntity<List<UserDTO>> findUserBykeyword(@RequestParam(value = "keyword") String keyword){
 		List<UserDTO> matchingUsers = this.userService.findByNameContaining(keyword);

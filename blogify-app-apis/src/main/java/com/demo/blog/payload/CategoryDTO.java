@@ -30,4 +30,5 @@ public class CategoryDTO {
 	@Size(min = 10,message = "length of description must be minimum 10")
 	private String categoryDescription;
 
+	
 }

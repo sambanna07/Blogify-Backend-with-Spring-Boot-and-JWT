@@ -242,8 +242,6 @@ public class PostServiceImpl implements PostService {
 	public List<PostDTO> getPostsByUserId(Integer userId) {
 		User user = this.userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(815, "User", "user id", userId));
-//		Sort sort=
-//		Pageable pageable=PageRequest.of(pageNumber,pageSize, null);
 		List<Post> listOfPostByUser = this.postRepo.findByUser(user);
 		if (listOfPostByUser.size() == 0) {
 			throw new ResourceNotFoundException(813, "yet " + user.getName() + " not post any blog");
@@ -259,6 +257,13 @@ public class PostServiceImpl implements PostService {
 
 	}
 
+	/**
+	 * this method used for search post resource based on keyword
+	 * 
+	 * @exception if post not available with keyword then it throw
+	 *               ResourceNotFoundException
+	 * @return returns list of PostDTO object to controller based on given keyword
+	 */
 	@Override
 	public List<PostDTO> searchPostByTitle(String keyword) {
 		List<Post> postBasedOnSearching = this.postRepo.searchPostByTitle("%"+keyword+"%");
