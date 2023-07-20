@@ -59,13 +59,7 @@ public class UserServiceImpl implements UserService {
 		// fetch user based on id,if user not available then throw exception
 		User user = this.userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(602, "user", "id", userId));
-		Optional<User> userByEmail = Optional.ofNullable(this.userRepo.findByEmail(userDTO.getEmail()));
-		if (userByEmail.isPresent()) {
-			User userOptional = userByEmail.get();
-			if (userOptional.getId() != userId) {
-				throw new AlreadyExistException(601, "user", "email", userDTO.getEmail());
-			}
-		}
+		User userByEmail = this.userRepo.findByEmail(userDTO.getEmail()).orElseThrow(() -> new AlreadyExistException(612,"User", "email",userDTO.getEmail()));
 		try {
 			user.setName(userDTO.getName());
 			user.setEmail(userDTO.getEmail());
