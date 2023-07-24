@@ -1,9 +1,9 @@
 package com.demo.blog.services;
 import java.util.List;
 
-import com.demo.blog.entity.User;
 import com.demo.blog.payload.UserDTO;
 import com.demo.blog.payload.UserResponse;
+import com.demo.blog.payload.UserResponseDTO;
 /**
  * 
  * @author Samundar Singh Rathore
@@ -17,21 +17,28 @@ public interface UserService {
 	 * @param userDTO
 	 * @return userDTO object
 	 */
-	 UserDTO createUser(UserDTO userDTO);
+	 UserResponseDTO createUser(UserDTO userDTO);
+	 
+	 /**
+	  * for register the user
+	  * @param user
+	  * @return
+	  */
+	 UserResponseDTO registerNewUser(UserDTO user);
 	 
 	 /**
 	  * for update the based on id
 	  * @param userDTO,userId
-	  * @return use object
+	  * @return use UserDTO object
 	  */
-	 UserDTO updateUser(UserDTO userDTO,Integer userId);
+	 UserResponseDTO updateUser(UserDTO userDTO,Integer userId);
 	 
 	 /**
 	  * for getting user based on id
 	  * @param userId
 	  * @return Use object
 	  */
-	 UserDTO getUserById(Integer userId);
+	 UserResponseDTO getUserById(Integer userId);
 	 
 	 /**
 	  * 
@@ -50,6 +57,6 @@ public interface UserService {
 	  * @param name
 	  * @return list of userdtos
 	  */
-	 List<UserDTO> findByNameContaining(String name);
+	 List<UserResponseDTO> findByNameContaining(String name);
 
 }

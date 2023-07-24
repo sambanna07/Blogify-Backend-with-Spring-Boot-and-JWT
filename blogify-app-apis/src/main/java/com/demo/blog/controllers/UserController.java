@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.demo.blog.configurations.AppConstants;
 import com.demo.blog.payload.UserDTO;
 import com.demo.blog.payload.UserResponse;
+import com.demo.blog.payload.UserResponseDTO;
 import com.demo.blog.services.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +47,9 @@ public class UserController {
 	 * @return newly created user resource with id
 	 */
 	@PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) throws Exception {
-		UserDTO createUserDTO = this.userService.createUser(userDTO);
-		return new ResponseEntity<UserDTO>(createUserDTO, HttpStatus.CREATED);
+	public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserDTO userDTO) throws Exception {
+		UserResponseDTO createUserDTO = this.userService.createUser(userDTO);
+		return new ResponseEntity<UserResponseDTO>(createUserDTO, HttpStatus.CREATED);
 	}
 
 	/**
@@ -57,9 +59,9 @@ public class UserController {
 	 * @return user resource based on provided userId
 	 */
 	@GetMapping(value = "/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> getUserById(@PathVariable(value = "id") Integer userId) throws Exception {
-		UserDTO userById = this.userService.getUserById(userId);
-		return new ResponseEntity<UserDTO>(userById, HttpStatus.OK);
+	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable(value = "id") Integer userId) throws Exception {
+		UserResponseDTO userById = this.userService.getUserById(userId);
+		return new ResponseEntity<UserResponseDTO>(userById, HttpStatus.OK);
 	}
 
 	/**
@@ -86,10 +88,10 @@ public class UserController {
 	 * @return updated user resource
 	 */
 	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO,
+	public ResponseEntity<UserResponseDTO> updateUser(@Valid @RequestBody UserDTO userDTO,
 			@RequestParam(value = "id") Integer userId) throws Exception {
-		UserDTO updatedUser = this.userService.updateUser(userDTO, userId);
-		return new ResponseEntity<UserDTO>(updatedUser, HttpStatus.OK);
+		UserResponseDTO updatedUser = this.userService.updateUser(userDTO, userId);
+		return new ResponseEntity<UserResponseDTO>(updatedUser, HttpStatus.OK);
 	}
 
 	/**
@@ -99,6 +101,7 @@ public class UserController {
 	 * @return success message = user deleted successfully
 	 */
 	@DeleteMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteUserById(@RequestParam(value = "id") Integer userId) throws Exception {
 		this.userService.deleteUser(userId);
 		return new ResponseEntity<String>("user deleted successfully", HttpStatus.ACCEPTED);
@@ -110,9 +113,9 @@ public class UserController {
 	 * @return list of dtos based on keyword
 	 */
 	@GetMapping(value = "/search")
-	public ResponseEntity<List<UserDTO>> findUserBykeyword(@RequestParam(value = "keyword") String keyword){
-		List<UserDTO> matchingUsers = this.userService.findByNameContaining(keyword);
-		return new ResponseEntity<List<UserDTO>>(matchingUsers,HttpStatus.OK);
+	public ResponseEntity<List<UserResponseDTO>> findUserBykeyword(@RequestParam(value = "keyword") String keyword){
+		List<UserResponseDTO> matchingUsers = this.userService.findByNameContaining(keyword);
+		return new ResponseEntity<List<UserResponseDTO>>(matchingUsers,HttpStatus.OK);
 	}
 
 }
