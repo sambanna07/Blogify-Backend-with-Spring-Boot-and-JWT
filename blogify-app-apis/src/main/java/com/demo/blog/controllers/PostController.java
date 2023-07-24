@@ -43,8 +43,8 @@ public class PostController {
 	@Autowired
 	private FileService fileService;
 	
-	@Value("${application.image}")
-	String path;
+//	@Value("${application.image}")
+	private String path="image/";
 
 
 	/**

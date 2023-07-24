@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class UserResponse {
 	
-	private List<UserDTO> userContent;
+	private List<UserResponseDTO> userContent;
 	
 	private int pageNumber;
 	
