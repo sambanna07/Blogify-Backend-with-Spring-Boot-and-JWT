@@ -22,7 +22,7 @@ import com.demo.blog.exceptions.ServiceInternalException;
 @RestControllerAdvice
 public class UserControllerAdvice extends ResponseEntityExceptionHandler {
 
-	private static final String RESOURCE_NOT_FOUND = null;
+
 
 	/**
 	 * handle the ResourceNotFoundException and return user friendly message
@@ -31,7 +31,7 @@ public class UserControllerAdvice extends ResponseEntityExceptionHandler {
 	 * @return
 	 */
 	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException resourceNotFoundException) {
+	public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException resourceNotFoundException) {
 		return ResponseEntity.status(resourceNotFoundException.getErrorCode())
 				.body(resourceNotFoundException.getMessage());
 
@@ -44,7 +44,7 @@ public class UserControllerAdvice extends ResponseEntityExceptionHandler {
 	 * @return
 	 */
 	@ExceptionHandler(AlreadyExistException.class)
-	public ResponseEntity<?> handleAlreadyExistException(AlreadyExistException alreadyExistException) {
+	public ResponseEntity<Object> handleAlreadyExistException(AlreadyExistException alreadyExistException) {
 		return ResponseEntity.status(alreadyExistException.getErrorCode()).body(alreadyExistException.getMessage());
 	}
 
@@ -84,14 +84,14 @@ public class UserControllerAdvice extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(ServiceInternalException.class)
-	public ResponseEntity<?> handleException(ServiceInternalException serviceInternalException) {
+	public ResponseEntity<Object> handleException(ServiceInternalException serviceInternalException) {
 		return ResponseEntity.status(serviceInternalException.getErrorCode())
 				.body(serviceInternalException.getMessage());
 
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleException(Exception exception) {
+	public ResponseEntity<Object> handleException(Exception exception) {
 		return new ResponseEntity<>("Something went wrong due : " + exception.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 

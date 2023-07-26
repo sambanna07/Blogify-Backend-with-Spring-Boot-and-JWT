@@ -50,7 +50,7 @@ public class BlogifyAppApisApplication implements CommandLineRunner{
 			this.roleRepo.saveAll(roles);
 
 		} catch (Exception e) {
-			new ResourceNotFoundException(1111,"some thing went wrong in creating roles table");
+			throw new ResourceNotFoundException(1111,"some thing went wrong in creating roles table");
 		}
 		
 	}
